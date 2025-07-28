@@ -8,10 +8,13 @@ permalink: /about.html
 
 ## Children of the Struggle 
 
-The Children of the Struggle oral history project joins several existing collections about Black Burke County residents who experienced public school desegregation in the 1950's and 1960's. 
+Children of the Struggle is a digital collaboration building upon decades of community work to document and preserve the stories of Black residents who experienced desegregation and fought for civil rights in Burke County, North Carolina.
 
-- The History Museum of Burke County began interviewing in 2015 and developed an exhibit by the name "Children of the Struggle." The exhibit began in 2017 and is still running as of 2025. It is located in the basement of the History Museum at 201 W Meeting St in Morganton, NC and admission to the Museum is free.
-- The   
+This project combines several new and existing collections: 
+
+- Interviews from the History Museum of Burke County. In 2015, The History Museum of Burke County began conducting interviews about public school desegregation and developed an exhibit by the name "Children of the Struggle." The exhibit launched in 2017 and is still running as of 2025. It is located in the basement of the History Museum at 201 W Meeting St in Morganton, NC and admission to the Museum is free. *insert photo?*
+- Interviews, primary sources, and secondary sources from the historical marker committee. In 2022, Dr. Leslie D. McKesson formed a historical marker committee of a group of local activists, archivists, and community members in order to research and install a historical marker at Slades Chapel AME Church. With the support of the North Carolina Room at the Burke County Public Library, this committee conducted additional interviews of Black residents who were students during desegregation, specifically the children and friends of the West Concord Mothers. The committee compiled and submitted a packet of primary and secondary sources to make the case for a historical marker installation honoring the West Concord Mothers. Their proposal was successful and the marker was installed on ****, 2023. For more on the historical marker, see here. *insert marker photo*
+- Interviews from Dr. Leslie D. McKesson's students at Appalachian State University. In Fall 2024, Dr. Leslie D. McKesson taught a public history course to undergraduate students at Appalachian State University. The course focused on desegregation of public schools in North Carolina and, specifically, Burke County. As part of the course, her students conducted fourteen interviews on November 9, 2024 at New Day Christian Church in Morganton. *insert interview day photo*        
 
 If you'd like to copy an Oral History as Data template and get started, go to this site's repo--[the OHD GitHub Template repository](https://github.com/oralhistoryasdata/template){:target="_blank"}--and click the green "Use This Template" button at the right. 
 
