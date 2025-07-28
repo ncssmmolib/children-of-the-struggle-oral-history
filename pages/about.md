@@ -1,14 +1,17 @@
 ---
 layout: page-narrow
-title: About Oral History as Data
+title: About Children of the Struggle 
 order: 1
 object-id: about
 permalink: /about.html
 ---
 
-## About This Template/Demo Site 
+## Children of the Struggle 
 
-This is the Oral History as Data (OHD) template/demo site. It features several coded transcripts from [CTRL+Shift](https://ctrl-shift.org/){:target="_blank"} to demonstrate the various AV sources and options for a OHD project. . 
+The Children of the Struggle oral history project joins several existing collections about Black Burke County residents who experienced public school desegregation in the 1950's and 1960's. 
+
+- The History Museum of Burke County began interviewing in 2015 and developed an exhibit by the name "Children of the Struggle." The exhibit began in 2017 and is still running as of 2025. It is located in the basement of the History Museum at 201 W Meeting St in Morganton, NC and admission to the Museum is free.
+- The   
 
 If you'd like to copy an Oral History as Data template and get started, go to this site's repo--[the OHD GitHub Template repository](https://github.com/oralhistoryasdata/template){:target="_blank"}--and click the green "Use This Template" button at the right. 
 
