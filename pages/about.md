@@ -11,7 +11,8 @@ permalink: /about.html
 Children of the Struggle is a digital collaboration building upon decades of community work to document and preserve the stories of Black residents who experienced desegregation and fought for civil rights in Burke County, North Carolina.
 
 This project honors the lives and work of the West Concord Mothers and their descendants, who are also referred to as the "Seven Mothers" or the "Big Seven." From 1958 to 1963 (and beyond), Annie J. Hicks, Ruth Forney, Willette Chambers, Laura Thomas, Lucille Rutherford, Mildred Largent, and Rose Johnson petitioned Morganton City School Board and the Morganton City Council for their children to attend the schools closest to their homes, which were the segregated white schools. If the City did not meet their request, the Seven Mothers were prepared to escort their children to the all-white Forest Hill Elementary School, the school closest to their homes. In response to the Mothers' organizing along with pressure from the local branch of the NAACP, Slades Chapel AME Church, Gaston Chapel AME Church, and New Bethel Baptist Church, the Morganton School Board launched a pilot desegregation in 1963. Thirty Black students from West Concord Street were reassigned to the formerly all-white schools closer to their homes for the 1963-1964 school year. These students are sometimes referred to as being part of "the first wave" of desegregation in Burke County schools. 
-*insert Mothers' photo here*
+
+<img src=(https://images.squarespace-cdn.com/content/v1/55be0df5e4b07e0f754414a5/1669232537903-TAMBCCDI6SXCXOKHBERB/Screen+Shot+2022-11-23+at+2.42.05+PM.png?format=1500w) alt="Photo collage of the Seven Mothers with cropped potraits of their smiling faces surrounding a photo of Olive Hill High School.">
 
 ## About the Project 
 
