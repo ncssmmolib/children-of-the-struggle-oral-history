@@ -221,5 +221,13 @@ sortOptions.forEach((button) => {
     }
   });
 }); 
-
+    
+// Automatically click the "Date" sort button on page load
+document.addEventListener("DOMContentLoaded", () => {
+  const defaultSort = document.querySelector('[data-filter="date"]');
+  if (defaultSort) {
+    defaultSort.click();
+  }
+});
+    
 </script>
