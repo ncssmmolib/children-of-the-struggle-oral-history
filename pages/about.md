@@ -13,7 +13,7 @@ Children of the Struggle is a digital collaboration building upon decades of com
 This project honors the lives and work of the West Concord Mothers and their descendants, who are also referred to as the "Seven Mothers" or the "Big Seven." From 1958 to 1963 (and beyond), Annie J. Hicks, Ruth Forney, Willette Chambers, Laura Thomas, Lucille Rutherford, Mildred Largent, and Rose Johnson petitioned Morganton City School Board and the Morganton City Council for their children to attend the schools closest to their homes, which were the segregated white schools. If the City did not meet their request, the Seven Mothers were prepared to escort their children to the all-white Forest Hill Elementary School, the school closest to their homes. In response to the Mothers' organizing along with pressure from the local branch of the NAACP, Slades Chapel AME Church, Gaston Chapel AME Church, and New Bethel Baptist Church, the Morganton School Board launched a pilot desegregation in 1963. Thirty Black students from West Concord Street were reassigned to the formerly all-white schools closer to their homes for the 1963-1964 school year. These students are sometimes referred to as being part of "the first wave" of desegregation in Burke County schools. 
 
 <div style="text-align: center;">
-<img src="/pages/mothers.png" width="400" height="300" alt="Photo collage of the Seven Mothers with cropped potraits of their smiling faces surrounding a photo of Olive Hill High School.">
+<img src="{{ '/assets/img/mothers.png' | relative_url }}" width="400" height="300" alt="Photo collage of the Seven Mothers with cropped potraits of their smiling faces surrounding a photo of Olive Hill High School.">
 <figure>
 <figcaption>Photo Collage of the Seven Mothers. Created by *insert name and date.*</figcaption>
 </figure>
@@ -41,7 +41,7 @@ The digital side of the Children of the Struggle combines several new and existi
 </div>
 
 <div style="text-align: center;">
-<img src="/pages/nov-9-team.jpg" width="400" height="300" alt="Group photo of Appalachian State University students and instructor Dr. Leslie D. McKesson. Seven people are kneeling in the front row. Nine students are standing in the middle row. Two staff are standing in the back row.">
+<img src="{{ '/assets/img/nov-9-team.jpg' | relative_url }}" width="400" height="300" alt="Group photo of Appalachian State University students and instructor Dr. Leslie D. McKesson. Seven people are kneeling in the front row. Nine students are standing in the middle row. Two staff are standing in the back row.">
 <figure>
 <figcaption>Interview Team after conducting interviews at New Day Christian Church. Pictured: students and staff from Appalachian State University and community volunteers.</figcaption>
 </figure>
