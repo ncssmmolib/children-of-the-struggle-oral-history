@@ -3,4 +3,4 @@ interviewer,Interviewed by
 date,Date,,false,Date
 subject,,,true
 location,,true
-description,,,,
+description,,true,
