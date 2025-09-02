@@ -1,4 +1,5 @@
 field,display_name,btn,hidden,sort_name
 interviewer,Interviwed by
 date,Date,,false,Date
+subject,,true
 location,,true
