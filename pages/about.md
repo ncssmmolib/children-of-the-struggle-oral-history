@@ -53,7 +53,7 @@ The digital side of the Children of the Struggle combines several new and existi
 </figure>
 </div>
 
-## Children of the Struggle gives gratitude and acknowledgement to the following:
+## Gratitude and Acknowledgements
 
 - Dr. Leslie D. McKesson, without whom this project would not exist
 - Project interviewees
@@ -62,3 +62,4 @@ The digital side of the Children of the Struggle combines several new and existi
 - North Carolina School of Science and Mathematics-Morganton faculty, staff, and students
 - Appalachian State University students and staff
 - Digital NC, who provided guidance for this project and maintains a copy of this collection
+- Jenn Martin for site development assistance
