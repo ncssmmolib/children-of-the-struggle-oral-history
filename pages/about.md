@@ -62,4 +62,4 @@ The digital side of the Children of the Struggle combines several new and existi
 - North Carolina School of Science and Mathematics-Morganton faculty, staff, and students
 - Appalachian State University students and staff
 - Digital NC, who provided guidance for this project and maintains a copy of this collection
-- Jenn Martin for site development assistance
+- Jenn Martin and Devin Becker for site development assistance
