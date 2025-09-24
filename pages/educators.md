@@ -1,4 +1,3 @@
-
 ---
 title: Educator Resources
 layout: about
