@@ -32,6 +32,9 @@ The digital side of the Children of the Struggle combines several new and existi
 
 <div style="text-align: center;">
 <img src="{{ '/assets/img/marker.jpg' | relative_url }}" width="500" height="400" alt="Photograph of historical marker honoring Seven Mothers. Marker has a white background with black lettering and red outline on the edges. Marker reads, 'Slades Chapel. Black mothers led fight for equality in education. Organized meetings and demonstrations here. 1961. Inspired nonviolent change. N.C. African American Heritage Commission. William C. Pomeroy Foundation 2023.">
+<figure>
+<figcaption>Photo of NC Civil Rights Trail historical marker honoring the West Concord Mothers.</figcaption>
+</figure>
 </div>
 
 - Interviews from Dr. Leslie D. McKesson's students at Appalachian State University. In Fall 2024, Dr. Leslie D. McKesson taught a public history course to undergraduate students at Appalachian State University. The course focused on desegregation of public schools in North Carolina and, specifically, Burke County. As part of the course, her students conducted fourteen interviews on November 9, 2024 at New Day Christian Church in Morganton.
