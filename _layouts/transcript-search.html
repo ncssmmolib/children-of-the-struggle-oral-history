@@ -1,0 +1,127 @@
+---
+# Lunr search page with transcript content
+layout: page
+custom-foot: js/lunr-transcripts-js.html
+---
+{%- assign fields = site.data.config-search | where: 'index',true | map: 'field' -%}
+
+<div class="row">
+  <div class="col-md-8">
+    <h2>Search Transcripts</h2>
+    <p class="lead">Search across all interview transcripts to find specific topics, quotes, and stories.</p>
+  </div>
+  <div class="col-md-4 text-end">
+    <!-- Button trigger modal -->
+    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#operators">
+      <svg width="16" height="16" fill="currentColor" class="bi bi-info-circle me-1" viewBox="0 0 16 16">
+        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+        <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
+      </svg>
+      Search Tips
+    </button>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="operators" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel">Transcript Search Tips</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6>Search Features</h6>
+                <p>This search looks through all transcript content, including speaker dialogue, to help you find specific stories, topics, and quotes.</p>
+
+                <h6 class="mt-3">Advanced Search Options</h6>
+                <ul>
+                    <li><strong>Search specific fields:</strong> Use field names like <code>speaker:John</code>, <code>title:integration</code>, or <code>words:school</code></li>
+                    <li><strong>Wildcards:</strong> Add <code>*</code> to match any characters, e.g., <code>teach*</code> finds "teacher," "teaching," etc.</li>
+                    <li><strong>Fuzzy match:</strong> Add <code>~1</code> after a word to find similar spellings, e.g., <code>school~1</code></li>
+                    <li><strong>Boost terms:</strong> Add <code>^10</code> to make a term more important, e.g., <code>desegregation^10 school</code></li>
+                </ul>
+
+                <h6 class="mt-3">Search Examples</h6>
+                <ul>
+                    <li><code>Mountain View Elementary</code> - Find mentions of this school</li>
+                    <li><code>teach*</code> - Find teacher, teaching, teachers, etc.</li>
+                    <li><code>speaker:McIntosh football</code> - Find when McIntosh talked about football</li>
+                    <li><code>desegregation experience</code> - Find discussions of desegregation experiences</li>
+                </ul>
+
+                <p class="text-muted mt-3"><small>Note: Results show up to 3 matching segments per interview. Click "View in transcript" to see the full context.</small></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{ content }}
+
+<div class="mt-4">
+    <form class="" role="search" id="transcriptSearch" onsubmit="lunr_search_transcripts(); return false;">
+        <div class="input-group input-group-lg">
+            <input id="lunrSearchBox" class="form-control" type="text" placeholder="Search interviews and transcripts..." aria-label="Search transcripts">
+            <button class="btn btn-success" type="submit">
+                <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                </svg>
+                <span class="visually-hidden">Search</span>
+            </button>
+        </div>
+    </form>
+
+    <table id="lunrResults" class="table table-responsive mt-3"></table>
+</div>
+
+<div class="mt-4">
+    <p class="text-muted">
+      <small>
+        Powered by <a href="https://lunrjs.com/" target="_blank">Lunr.js</a>.
+        Searching {{ site.data.transcripts | size }} transcripts with full-text content.
+      </small>
+    </p>
+</div>
+
+<style>
+/* Custom styles for transcript search results */
+.transcript-result {
+  background-color: #f8f9fa;
+  border-left: 4px solid #0d6efd;
+  margin-bottom: 1.5rem;
+}
+
+.metadata-result {
+  border-left: 4px solid #6c757d;
+  margin-bottom: 1.5rem;
+}
+
+.transcript-segment {
+  background-color: white;
+  border-radius: 4px;
+}
+
+.transcript-segment p {
+  line-height: 1.6;
+}
+
+mark {
+  background-color: #fff3cd;
+  padding: 2px 4px;
+  border-radius: 2px;
+  font-weight: 500;
+}
+
+#lunrResults tr td {
+  padding: 1rem;
+}
+
+.search-result .h5 {
+  margin-bottom: 0.5rem;
+}
+
+.search-result .badge {
+  font-size: 0.75rem;
+  vertical-align: middle;
+}
+</style>
