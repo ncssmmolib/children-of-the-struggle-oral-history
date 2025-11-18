@@ -19,15 +19,16 @@
     var geodata = { "type": "FeatureCollection", "features": [ 
     {% for item in items %}
     { "type":"Feature", "geometry":{ "type":"Point", "coordinates":[{{ item.longitude | strip }},{{ item.latitude | strip }}] }, "properties":
-    { 
+    {
         {% for f in fields %}{% if item[f.field] %}{{ f.field | escape | jsonify }}:{{ item[f.field] | strip | escape | jsonify }}, {%- endif -%}{%- endfor -%}
         {% if item.image_thumb %}"img": {{ item.image_thumb | relative_url | jsonify }},{% endif %}
         {% if item.display_template %}"template": {{ item.display_template | escape | jsonify }}, {%- endif -%}
         {% if item.format %}"format": {{ item.format | escape | jsonify }}, {%- endif -%}
         {% if item.image_alt_text %}"alt": {{ item.image_alt_text | escape | jsonify }}, {%- endif -%}
         {% if item.parentid %}"parent": {{ item.parentid | jsonify }}, {%- endif -%}
+        {% if item.marker_image %}"marker_image": {{ item.marker_image | relative_url | jsonify }}, {%- endif -%}
         "title": {{ item.title | escape | jsonify }},
-        "id": {{ item.objectid | jsonify }} 
+        "id": {{ item.objectid | jsonify }}
     } }{% unless forloop.last %}, {% endunless %}{% endfor %}
     ]};
 
@@ -90,9 +91,9 @@
 
     {% if site.data.theme.map-cluster == true %}
     /* create cluster group */
-    var markers = L.markerClusterGroup({ 
-        maxClusterRadius: {{ site.data.theme.map-cluster-radius | default: 15 }}, 
-        singleMarkerMode: true,
+    var markers = L.markerClusterGroup({
+        maxClusterRadius: {{ site.data.theme.map-cluster-radius | default: 15 }},
+        singleMarkerMode: false,
         iconCreateFunction: function(cluster) {
             /* custom icon function, tweak default to add more alt text */
             var childCount = cluster.getChildCount();
@@ -140,7 +141,45 @@
         layer.bindPopup(popupTemplate);
     }
     function objectMarkers(feature,latlng) {
-        var marker = L.marker(latlng, {alt: feature.properties.title});
+        var marker;
+        console.log('Creating marker for:', feature.properties.title);
+        console.log('marker_image:', feature.properties.marker_image);
+        console.log('img:', feature.properties.img);
+        console.log('template:', feature.properties.template);
+
+        // Priority 1: Use custom marker_image if specified in CSV
+        if (feature.properties.marker_image) {
+            console.log('Using custom marker_image:', feature.properties.marker_image);
+            var customIcon = L.icon({
+                iconUrl: feature.properties.marker_image,
+                iconSize: [80, 80],
+                iconAnchor: [20, 40],
+                popupAnchor: [0, -40],
+                className: 'custom-map-marker'
+            });
+            marker = L.marker(latlng, {icon: customIcon, alt: feature.properties.title});
+        }
+        // Priority 2: Use thumbnail for actual photos (not YouTube thumbnails)
+        else {
+            var isActualPhoto = feature.properties.template === 'image' ||
+                               (feature.properties.img && !feature.properties.img.includes('youtube.com') && !feature.properties.img.includes('img.youtube.com'));
+
+            if (isActualPhoto && feature.properties.img) {
+                console.log('Using photo thumbnail:', feature.properties.img);
+                var customIcon = L.icon({
+                    iconUrl: feature.properties.img,
+                    iconSize: [100, 100],
+                    iconAnchor: [25, 50],
+                    popupAnchor: [0, -50],
+                    className: 'custom-map-marker'
+                });
+                marker = L.marker(latlng, {icon: customIcon, alt: feature.properties.title});
+            } else {
+                // Fallback: Use default marker
+                console.log('Using default marker (no custom image)');
+                marker = L.marker(latlng, {alt: feature.properties.title});
+            }
+        }
         {% if site.data.theme.map-cluster == true %}markers.addLayer(marker);{% endif %}
         return marker;
     }
