@@ -12,6 +12,11 @@
 <script src="{{ '/assets/lib/leaflet/leaflet.fusesearch.js' | relative_url }}"></script>{% endif %}
 {% if site.data.theme.map-cluster == true %}<script src="{{ '/assets/lib/leaflet/leaflet.markercluster.js' | relative_url }}"></script>{% endif %}
 {% if site.data.theme.map-search == true and site.data.theme.map-cluster == true %}<script src="{{ '/assets/lib/leaflet/leaflet.markercluster.freezable.js' | relative_url }}"></script>{% endif %}
+<!-- load routing dependencies -->
+<link rel="stylesheet" href="{{ '/assets/lib/leaflet/leaflet-routing-machine.css' | relative_url }}" />
+<script src="{{ '/assets/lib/leaflet/leaflet-routing-machine.js' | relative_url }}"></script>
+<script src="{{ '/assets/lib/leaflet/lrm-openrouteservice.js' | relative_url }}"></script>
+<script src="{{ '/assets/lib/leaflet/leaflet-ant-path.js' | relative_url }}"></script>
 
 <script>
 (function(){
@@ -86,8 +91,148 @@
     searchCtrl.addTo(map);
     searchCtrl.indexFeatures(geodata.features, {{ fields | where: 'search','true' | map: 'field' | unshift: 'title' | jsonify }});{% endif %}
 
-    /* add fullscreen control */ 
+    /* add fullscreen control */
     map.addControl(new L.Control.Fullscreen());
+
+    /* add custom control for clearing routes */
+    L.Control.ClearRoute = L.Control.extend({
+        onAdd: function(map) {
+            var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+            container.innerHTML = '<a href="#" title="Clear Route" style="background-color: white; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-weight: bold; text-decoration: none; color: #333;">✕</a>';
+            container.style.backgroundColor = 'white';
+            container.style.width = '30px';
+            container.style.height = '30px';
+            container.onclick = function(e) {
+                e.preventDefault();
+                clearCurrentRoute();
+            };
+            return container;
+        },
+        onRemove: function(map) {}
+    });
+    L.control.clearRoute = function(opts) {
+        return new L.Control.ClearRoute(opts);
+    };
+    L.control.clearRoute({ position: 'topleft' }).addTo(map);
+
+    /* Interactive routing system between any two points */
+    // please be nice! This is a free key, you can also get your own, openrouteservice.org
+    var ORS_A_P_I_K_E_Y = atob("ZXlKdmNtY2lPaUkxWWpOalpUTTFPVGM0TlRFeE1UQXdNREZqWmpZeU5EZ2lMQ0pwWkNJNklqWXpORFUwWkRGaU4yRXpNRFE1TVRoaVltWmxNREU1WlRGaE1qVmxNbUZqSWl3aWFDSTZJbTExY20xMWNqWTBJbjA9Cg==");
+
+    // State for interactive routing
+    var selectedMarkers = [];
+    var currentAntPath = null;
+    var currentRouteControl = null;
+    var allMarkerLayers = [];
+
+    // Function to clear current route
+    function clearCurrentRoute() {
+        if (currentAntPath) {
+            map.removeLayer(currentAntPath);
+            currentAntPath = null;
+        }
+        if (currentRouteControl) {
+            map.removeControl(currentRouteControl);
+            currentRouteControl = null;
+        }
+        selectedMarkers = [];
+        // Reset marker styling
+        allMarkerLayers.forEach(function(markerLayer) {
+            markerLayer.setOpacity(1.0);
+        });
+    }
+
+    // Function to create route between two markers
+    function createRouteBetweenMarkers(marker1, marker2) {
+        clearCurrentRoute();
+
+        var latlng1 = marker1.getLatLng();
+        var latlng2 = marker2.getLatLng();
+
+        // Get marker titles
+        var title1 = marker1.feature ? marker1.feature.properties.title : 'Location 1';
+        var title2 = marker2.feature ? marker2.feature.properties.title : 'Location 2';
+
+        // Highlight selected markers
+        marker1.setOpacity(0.6);
+        marker2.setOpacity(0.6);
+
+        // Create routing control to get the route and show directions
+        currentRouteControl = L.Routing.control({
+            router: L.Routing.openrouteserviceV2(ORS_A_P_I_K_E_Y, {
+                profile: 'foot-walking'
+            }),
+            waypoints: [latlng1, latlng2],
+            routeWhileDragging: false,
+            addWaypoints: false,
+            show: true,
+            collapsible: true,
+            units: 'imperial',
+            createMarker: function() { return null; }, // Don't create waypoint markers
+            formatter: new L.Routing.Formatter({
+                distanceTemplate: '{value} {unit}',
+                units: 'imperial',
+                unitNames: {
+                    meters: 'mi',
+                    kilometers: 'mi',
+                    yards: 'mi',
+                    miles: 'mi',
+                    minutes: 'min',
+                    hours: 'hr'
+                },
+                formatDistance: function(d) {
+                    // d is already in miles from the API
+                    return Math.round(d * 100) / 100;
+                },
+                formatTime: function(t) {
+                    // t is in seconds, convert to minutes
+                    var minutes = Math.round(t / 60);
+                    return minutes + ' min';
+                }
+            }),
+            plan: L.Routing.plan([latlng1, latlng2], {
+                createMarker: function() { return null; },
+                routeWhileDragging: false,
+                addWaypoints: false
+            }),
+            summaryTemplate: '<h3>{name}</h3><p>{distance}, {time}</p>'
+        });
+
+        // When route is found, create ant path and update title
+        currentRouteControl.on('routesfound', function(e) {
+            var routes = e.routes;
+            var route = routes[0];
+            var coordinates = route.coordinates;
+
+            // Update the route name in the control panel
+            route.name = title1 + ' to ' + title2;
+
+            // Update the displayed route title with line breaks
+            setTimeout(function() {
+                var routeTitle = document.querySelector('.leaflet-routing-container h3');
+                if (routeTitle) {
+                    routeTitle.innerHTML = title1 + '<br>to<br>' + title2;
+                }
+            }, 100);
+
+            // Create ant path with the route coordinates
+            // const options = { use: L.polyline, delay: 400, dashArray: [10,20], weight: 5, color: "#0000FF", pulseColor: "#FFFFFF" };
+            const options = { use: L.polyline, delay: 800, dashArray: [20,40], weight: 25, color: "#0000FF", pulseColor: "#FFFFFF", hardwareAccelerated: true };
+            currentAntPath = L.polyline.antPath(coordinates, options).addTo(map);
+
+            // Fit map to show the route
+            map.fitBounds(currentAntPath.getBounds(), { padding: [50, 50] });
+
+            // Show distance and time in console or popup
+            console.log(`Unedited dist: ${route.summary.totalDistance}`);
+
+            var distance = (route.summary.totalDistance).toFixed(2); // already in miles
+            var time = Math.round(route.summary.totalTime / 60); // Convert to minutes
+            console.log(`Route: ${distance} miles, approximately ${time} minutes walking`);
+        });
+
+        currentRouteControl.addTo(map);
+    }
 
     {% if site.data.theme.map-cluster == true %}
     /* create cluster group */
@@ -130,15 +275,41 @@
         }
         // set up popup content
         var popupTemplate = '<h2 class="h4"><a class="text-dark" href="' + itemHref + '">' +
-            feature.properties.title + '</a></h2><div class="text-center"><a href="' + itemHref + 
+            feature.properties.title + '</a></h2><div class="text-center"><a href="' + itemHref +
             '" >' + thumbImg + '</a></div><p>';
         {% for f in fields %}{% if f.display_name %}
         if (feature.properties[{{ f.field | escape | jsonify }}]) {
-            popupTemplate += '<strong>{{ f.display_name }}:</strong> ' + feature.properties[{{ f.field | escape | jsonify }}] + '<br>'; 
+            popupTemplate += '<strong>{{ f.display_name }}:</strong> ' + feature.properties[{{ f.field | escape | jsonify }}] + '<br>';
         }
         {% endif %}{% endfor %}
         popupTemplate += '</p><div class="text-center"><a class="btn btn-light" href="' + itemHref + '" >View Item</a></div>';
+        popupTemplate += '<div class="text-center mt-2"><button class="btn btn-sm btn-primary select-for-route">Select for Route</button></div>';
         layer.bindPopup(popupTemplate);
+
+        // Add click handler for route selection
+        layer.on('click', function(e) {
+            // Handle "Select for Route" button clicks
+            setTimeout(function() {
+                var selectButton = document.querySelector('.select-for-route');
+                if (selectButton) {
+                    selectButton.onclick = function() {
+                        if (selectedMarkers.length === 0) {
+                            selectedMarkers.push(layer);
+                            layer.setOpacity(0.6);
+                            alert('First location selected. Click another marker to create a route.');
+                        } else if (selectedMarkers.length === 1) {
+                            if (selectedMarkers[0] === layer) {
+                                alert('Please select a different location for the route.');
+                                return;
+                            }
+                            selectedMarkers.push(layer);
+                            createRouteBetweenMarkers(selectedMarkers[0], selectedMarkers[1]);
+                            layer.closePopup();
+                        }
+                    };
+                }
+            }, 100);
+        });
     }
     function objectMarkers(feature,latlng) {
         var marker;
@@ -175,6 +346,10 @@
             console.log('Using default marker (no custom image)');
             marker = L.marker(latlng, {alt: feature.properties.title});
         }
+
+        // Store marker for route selection
+        allMarkerLayers.push(marker);
+
         {% if site.data.theme.map-cluster == true %}markers.addLayer(marker);{% endif %}
         return marker;
     }
