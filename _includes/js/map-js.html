@@ -159,26 +159,21 @@
             });
             marker = L.marker(latlng, {icon: customIcon, alt: feature.properties.title});
         }
-        // Priority 2: Use thumbnail for actual photos (not YouTube thumbnails)
-        else {
-            var isActualPhoto = feature.properties.template === 'image' ||
-                               (feature.properties.img && !feature.properties.img.includes('youtube.com') && !feature.properties.img.includes('img.youtube.com'));
-
-            if (isActualPhoto && feature.properties.img) {
-                console.log('Using photo thumbnail:', feature.properties.img);
-                var customIcon = L.icon({
-                    iconUrl: feature.properties.img,
-                    iconSize: [100, 100],
-                    iconAnchor: [25, 50],
-                    popupAnchor: [0, -50],
-                    className: 'custom-map-marker'
-                });
-                marker = L.marker(latlng, {icon: customIcon, alt: feature.properties.title});
-            } else {
-                // Fallback: Use default marker
-                console.log('Using default marker (no custom image)');
-                marker = L.marker(latlng, {alt: feature.properties.title});
-            }
+        // Priority 2: Use thumbnail image (including YouTube thumbnails)
+        else if (feature.properties.img) {
+            console.log('Using thumbnail image:', feature.properties.img);
+            var customIcon = L.icon({
+                iconUrl: feature.properties.img,
+                iconSize: [100, 100],
+                iconAnchor: [25, 50],
+                popupAnchor: [0, -50],
+                className: 'custom-map-marker'
+            });
+            marker = L.marker(latlng, {icon: customIcon, alt: feature.properties.title});
+        } else {
+            // Fallback: Use default marker
+            console.log('Using default marker (no custom image)');
+            marker = L.marker(latlng, {alt: feature.properties.title});
         }
         {% if site.data.theme.map-cluster == true %}markers.addLayer(marker);{% endif %}
         return marker;
