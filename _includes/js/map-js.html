@@ -24,6 +24,20 @@
 
 <script>
 (function(){
+    /* load map color configuration */
+    var mapColors = {
+        {% for category in site.data.map-colors.categories %}
+        "{{ category[0] }}": {
+            color: "{{ category[1].color }}",
+            border: "{{ category[1].border }}"
+        },
+        {% endfor %}
+        "default": {
+            color: "{{ site.data.map-colors.default.color }}",
+            border: "{{ site.data.map-colors.default.border }}"
+        }
+    };
+
     /* add collection map data */
     var geodata = { "type": "FeatureCollection", "features": [ 
     {% for item in items %}
@@ -36,6 +50,7 @@
         {% if item.image_alt_text %}"alt": {{ item.image_alt_text | escape | jsonify }}, {%- endif -%}
         {% if item.parentid %}"parent": {{ item.parentid | jsonify }}, {%- endif -%}
         {% if item.marker_image %}"marker_image": {{ item.marker_image | relative_url | jsonify }}, {%- endif -%}
+        {% if item.map_category %}"map_category": {{ item.map_category | strip | escape | jsonify }}, {%- endif -%}
         {% if item.start_year %}"start": "{{ item.start_year }}-01-01", {%- endif -%}
         {% if item.end_year %}"end": "{{ item.end_year }}-12-31", {%- endif -%}
         "title": {{ item.title | escape | jsonify }},
@@ -417,18 +432,12 @@
     function objectMarkers(feature,latlng) {
         var marker;
 
-        // Determine marker color based on title/subject
-        var markerColor = '#51cf66'; // Default green for other places
-        var borderColor = '#2f9e44';
-        var title = feature.properties.title ? feature.properties.title.toLowerCase() : '';
+        // Determine marker color based on map_category field from CSV
+        var category = feature.properties.map_category ? feature.properties.map_category.toLowerCase() : null;
+        var colorConfig = (category && mapColors[category]) ? mapColors[category] : mapColors.default;
 
-        if (title.includes('school')) {
-            markerColor = '#3388ff'; // Blue for schools
-            borderColor = '#0056b3';
-        } else if (title.includes('chapel') || title.includes('church')) {
-            markerColor = '#ff6b6b'; // Red for churches
-            borderColor = '#c92a2a';
-        }
+        var markerColor = colorConfig.color;
+        var borderColor = colorConfig.border;
 
         // Priority 1: Use custom marker_image if specified in CSV
         if (feature.properties.marker_image) {
