@@ -17,6 +17,10 @@
 <script src="{{ '/assets/lib/leaflet/leaflet-routing-machine.js' | relative_url }}"></script>
 <script src="{{ '/assets/lib/leaflet/lrm-openrouteservice.js' | relative_url }}"></script>
 <script src="{{ '/assets/lib/leaflet/leaflet-ant-path.js' | relative_url }}"></script>
+<!-- load timeline dependencies -->
+<script src="{{ '/assets/lib/leaflet/iso8601.min.js' | relative_url }}"></script>
+<link rel="stylesheet" href="{{ '/assets/lib/leaflet/leaflet.timedimension.control.min.css' | relative_url }}" />
+<script src="{{ '/assets/lib/leaflet/leaflet.timedimension.min.js' | relative_url }}"></script>
 
 <script>
 (function(){
@@ -32,6 +36,8 @@
         {% if item.image_alt_text %}"alt": {{ item.image_alt_text | escape | jsonify }}, {%- endif -%}
         {% if item.parentid %}"parent": {{ item.parentid | jsonify }}, {%- endif -%}
         {% if item.marker_image %}"marker_image": {{ item.marker_image | relative_url | jsonify }}, {%- endif -%}
+        {% if item.start_year %}"start": "{{ item.start_year }}-01-01", {%- endif -%}
+        {% if item.end_year %}"end": "{{ item.end_year }}-12-31", {%- endif -%}
         "title": {{ item.title | escape | jsonify }},
         "id": {{ item.objectid | jsonify }}
     } }{% unless forloop.last %}, {% endunless %}{% endfor %}
@@ -72,6 +78,78 @@
     L.control.layers(baseMaps).addTo(map);
     /* load base map */
     {{ site.data.theme.map-base | default: 'Esri_WorldStreetMap' }}.addTo(map);
+
+    /* initialize timeline dimension */
+    console.log('=== TIMELINE INITIALIZATION ===');
+    console.log('Creating TimeDimension with period P1Y and timeInterval 2012/2025');
+
+    var timeDimension = new L.TimeDimension({
+        period: "P1Y",  // 1 year intervals
+        timeInterval: "2012/2025"  // Range covering interview dates
+    });
+    map.timeDimension = timeDimension;
+
+    console.log('TimeDimension created:', timeDimension);
+    console.log('Available times:', timeDimension.getAvailableTimes());
+    console.log('Current time:', timeDimension.getCurrentTime());
+
+    /* add timeline control at bottom */
+    console.log('Adding TimeDimension control to map');
+
+    // Custom date formatter to show only the year
+    L.Control.TimeDimension.include({
+        _getDisplayDateFormat: function(date){
+            console.log('_getDisplayDateFormat called with:', date, 'type:', typeof date);
+            if (!date) {
+                console.log('Date is null/undefined');
+                return '----';
+            }
+            if (typeof date === 'number') {
+                console.log('Date is a timestamp, converting...');
+                date = new Date(date);
+            }
+            if (!(date instanceof Date) || isNaN(date.getTime())) {
+                console.log('Invalid date object:', date);
+                return '----';
+            }
+            var year = date.getUTCFullYear();
+            console.log('Extracted year:', year);
+            return year.toString();
+        }
+    });
+
+    var timeDimensionControl = new L.Control.TimeDimension({
+        position: 'bottomleft',
+        autoPlay: false,
+        loopButton: false,
+        timeSliderDragUpdate: true,
+        playerOptions: {
+            transitionTime: 500,
+            loop: false
+        },
+        timeSlider: true,
+        displayDate: true
+    });
+    map.addControl(timeDimensionControl);
+    console.log('TimeDimension control added');
+
+    // Add event listener for time changes
+    map.timeDimension.on('timeload', function(data) {
+        console.log('=== TIME CHANGED ===');
+        console.log('Raw time value:', data.time);
+        console.log('As Date object:', new Date(data.time));
+        console.log('ISO String:', new Date(data.time).toISOString());
+        console.log('Year:', new Date(data.time).getFullYear());
+        console.log('Current time index:', map.timeDimension.getCurrentTimeIndex());
+        console.log('Available times:', map.timeDimension.getAvailableTimes());
+    });
+
+    // Log when slider is moved
+    map.timeDimension.on('availabletimeschanged', function(data) {
+        console.log('=== AVAILABLE TIMES CHANGED ===');
+        console.log('Available times:', data.availableTimes);
+        console.log('Current time:', data.currentTime);
+    });
 
     {% if site.data.theme.map-search == true %}
     /* add search, https://github.com/naomap/leaflet-fusesearch */
@@ -338,10 +416,6 @@
     }
     function objectMarkers(feature,latlng) {
         var marker;
-        console.log('Creating marker for:', feature.properties.title);
-        console.log('marker_image:', feature.properties.marker_image);
-        console.log('img:', feature.properties.img);
-        console.log('template:', feature.properties.template);
 
         // Determine marker color based on title/subject
         var markerColor = '#51cf66'; // Default green for other places
@@ -358,7 +432,6 @@
 
         // Priority 1: Use custom marker_image if specified in CSV
         if (feature.properties.marker_image) {
-            console.log('Using custom marker_image:', feature.properties.marker_image);
             var customIcon = L.divIcon({
                 className: 'custom-circle-marker',
                 html: `<div style="width: 80px; height: 80px; border-radius: 50%; border: 4px solid ${borderColor}; overflow: hidden; background: ${markerColor}; display: flex; align-items: center; justify-content: center;">
@@ -372,7 +445,6 @@
         }
         // Priority 2: Use thumbnail image (including YouTube thumbnails)
         else if (feature.properties.img) {
-            console.log('Using thumbnail image:', feature.properties.img);
             var customIcon = L.divIcon({
                 className: 'custom-circle-marker',
                 html: `<div style="width: 100px; height: 100px; border-radius: 50%; border: 4px solid ${borderColor}; overflow: hidden; background: ${markerColor}; display: flex; align-items: center; justify-content: center;">
@@ -385,7 +457,6 @@
             marker = L.marker(latlng, {icon: customIcon, alt: feature.properties.title});
         } else {
             // Use colored circle marker
-            console.log('Using colored circle marker');
             marker = L.circleMarker(latlng, {
                 radius: 10,
                 fillColor: markerColor,
@@ -405,11 +476,105 @@
     }
 
     /* add objects from geoJson features */
+    console.log('=== CREATING MAP FEATURES ===');
+    console.log('GeoData features count:', geodata.features.length);
+    console.log('Sample feature properties:', geodata.features[0]?.properties);
+
     var mapFeatures = L.geoJson(geodata, {
         onEachFeature: objectPopups,
         pointToLayer: objectMarkers
-    }){% if site.data.theme.map-cluster != true %}.addTo(map);{% else %};
-    map.addLayer(markers);{% endif %}
+    });
+    console.log('GeoJSON layer created with', mapFeatures.getLayers().length, 'layers');
+
+    /* wrap with TimeDimension layer */
+    console.log('=== CREATING TIMEDIMENSION LAYER ===');
+    console.log('Creating TimeDimension GeoJSON layer');
+
+    // Check the features for time properties
+    geodata.features.forEach(function(feature, idx) {
+        console.log('Feature', idx, ':', feature.properties.title);
+        console.log('  start:', feature.properties.start, 'end:', feature.properties.end);
+        if (feature.properties.start) {
+            var startDate = new Date(feature.properties.start);
+            console.log('  Parsed start date:', startDate, 'Valid:', !isNaN(startDate.getTime()));
+        }
+    });
+
+    // Manually add times from features to the timeline
+    console.log('Manually registering times with TimeDimension...');
+    var times = [];
+    geodata.features.forEach(function(feature) {
+        // Add start times
+        if (feature.properties.start) {
+            var startTime = new Date(feature.properties.start).getTime();
+            if (!isNaN(startTime) && times.indexOf(startTime) === -1) {
+                times.push(startTime);
+                console.log('  Added start time:', feature.properties.start, 'for', feature.properties.title);
+            }
+        }
+        // Add end times too (important for features that disappear)
+        if (feature.properties.end) {
+            var endTime = new Date(feature.properties.end).getTime();
+            if (!isNaN(endTime) && times.indexOf(endTime) === -1) {
+                times.push(endTime);
+                console.log('  Added end time:', feature.properties.end, 'for', feature.properties.title);
+            }
+        }
+    });
+    times.sort(function(a, b) { return a - b; });
+    console.log('Total unique times to register:', times.length);
+
+    if (times.length > 0) {
+        map.timeDimension.setAvailableTimes(times, 'replace');
+        console.log('Times registered. Available times:', map.timeDimension.getAvailableTimes());
+    }
+
+    var timeDimensionLayer = L.timeDimension.layer.geoJson(mapFeatures, {
+        updateTimeDimension: false,  // We're manually setting times above
+        addlastPoint: false,  // Don't add last point - we want features to disappear
+        duration: null,  // Don't use duration-based display
+        waitForReady: true
+    });
+
+    // Override the default behavior to filter features by time range
+    var originalGetFeatureBetweenDates = timeDimensionLayer._getFeatureBetweenDates;
+    timeDimensionLayer._getFeatureBetweenDates = function(feature, minTime, maxTime) {
+        var start = feature.properties.start ? new Date(feature.properties.start).getTime() : -Infinity;
+        var end = feature.properties.end ? new Date(feature.properties.end).getTime() : Infinity;
+
+        // Check if current time is within the feature's range
+        var isVisible = start <= maxTime && end >= maxTime;
+
+        console.log('Checking feature:', feature.properties.title,
+                    'Time range:', new Date(start).getFullYear(), '-', new Date(end).getFullYear(),
+                    'Current time:', new Date(maxTime).getFullYear(),
+                    'Visible:', isVisible);
+
+        // Return the feature if visible, null otherwise
+        return isVisible ? feature : null;
+    };
+
+    console.log('TimeDimension layer created:', timeDimensionLayer);
+
+    // Log events
+    timeDimensionLayer.on('timeload', function(data) {
+        console.log('Timeline timeload event:', data.time, 'Available times:', timeDimension.getAvailableTimes());
+    });
+
+    map.timeDimension.on('timeloading', function(data) {
+        console.log('Timeline timeloading:', new Date(data.time));
+    });
+
+    map.timeDimension.on('timeload', function(data) {
+        console.log('Timeline timeload:', new Date(data.time));
+    });
+
+    {% if site.data.theme.map-cluster != true %}
+    timeDimensionLayer.addTo(map);
+    {% else %}
+    // For clustered markers, add directly
+    map.addLayer(markers);
+    {% endif %}
 
     {% if site.data.theme.auto-center-map == true %}
     /* if no location was specified in the URL query parameters, auto center the map */
