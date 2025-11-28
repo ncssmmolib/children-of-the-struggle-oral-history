@@ -23,8 +23,25 @@
 # - Pink: #ff6ac2
 
 categories:
+  school-white:
+    label: White-Only School
+    color: "#3388ff"
+    border: "#FFFFFF"
+
+  school-black:
+    label: Black-Only School
+    color: "#3388ff"
+    border: "#000000"
+
+  school-desegregated:
+    label: Desegregated School
+    color: "#3388ff"
+    border-primary: "#FFFFFF"
+    border-secondary: "#000000"
+    striped: true
+
   school:
-    label: School
+    label: School (General)
     color: "#3388ff"
     border: "#0056b3"
 

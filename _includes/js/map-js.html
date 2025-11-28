@@ -29,7 +29,10 @@
         {% for category in site.data.map-colors.categories %}
         "{{ category[0] }}": {
             color: "{{ category[1].color }}",
-            border: "{{ category[1].border }}"
+            border: "{{ category[1].border }}"{% if category[1].striped %},
+            striped: {{ category[1].striped }}{% endif %}{% if category[1].border-primary %},
+            "border-primary": "{{ category[1].border-primary }}"{% endif %}{% if category[1].border-secondary %},
+            "border-secondary": "{{ category[1].border-secondary }}"{% endif %}
         },
         {% endfor %}
         "default": {
@@ -195,8 +198,20 @@
             <div style="background: white; padding: 10px; border-radius: 5px; box-shadow: 0 1px 5px rgba(0,0,0,0.4);">
                 <h4 style="margin: 0 0 10px 0; font-size: 14px; font-weight: bold;">Map Legend</h4>
                 <div style="margin-bottom: 5px;">
-                    <span style="display: inline-block; width: 20px; height: 20px; background: #3388ff; border: 3px solid #0056b3; border-radius: 50%; vertical-align: middle; margin-right: 8px;"></span>
-                    <span style="font-size: 12px;">Schools</span>
+                    <span style="display: inline-block; width: 20px; height: 20px; background: #3388ff; border: 3px solid #FFFFFF; box-shadow: 0 0 0 1px #ccc; border-radius: 50%; vertical-align: middle; margin-right: 8px;"></span>
+                    <span style="font-size: 12px;">White-Only Schools</span>
+                </div>
+                <div style="margin-bottom: 5px;">
+                    <span style="display: inline-block; width: 20px; height: 20px; background: #3388ff; border: 3px solid #000000; border-radius: 50%; vertical-align: middle; margin-right: 8px;"></span>
+                    <span style="font-size: 12px;">Black-Only Schools</span>
+                </div>
+                <div style="margin-bottom: 5px;">
+                    <svg width="26" height="20" style="vertical-align: middle; margin-right: 8px;">
+                        <circle cx="10" cy="10" r="8" fill="#3388ff" fill-opacity="0.8"/>
+                        <circle cx="10" cy="10" r="9.5" fill="none" stroke="#FFFFFF" stroke-width="3"/>
+                        <circle cx="10" cy="10" r="9.5" fill="none" stroke="#000000" stroke-width="3" stroke-dasharray="4,4"/>
+                    </svg>
+                    <span style="font-size: 12px;">Desegregated Schools</span>
                 </div>
                 <div style="margin-bottom: 5px;">
                     <span style="display: inline-block; width: 20px; height: 20px; background: #ff6b6b; border: 3px solid #c92a2a; border-radius: 50%; vertical-align: middle; margin-right: 8px;"></span>
@@ -438,14 +453,32 @@
 
         var markerColor = colorConfig.color;
         var borderColor = colorConfig.border;
+        var isStriped = colorConfig.striped || false;
+        var borderPrimary = colorConfig['border-primary'] || borderColor;
+        var borderSecondary = colorConfig['border-secondary'] || borderColor;
+
+        // Create border style for markers
+        var borderStyle = borderColor;
+        if (isStriped) {
+            // Create a striped border effect using box-shadow
+            borderStyle = `${borderPrimary}`;
+        }
 
         // Priority 1: Use custom marker_image if specified in CSV
         if (feature.properties.marker_image) {
+            var markerHtml;
+            if (isStriped) {
+                markerHtml = `<div style="width: 80px; height: 80px; border-radius: 50%; overflow: hidden; background: ${markerColor}; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 0 2px ${borderPrimary}, inset 0 0 0 4px ${borderSecondary}, inset 0 0 0 6px ${borderPrimary};">
+                        <img src="${feature.properties.marker_image}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none';">
+                      </div>`;
+            } else {
+                markerHtml = `<div style="width: 80px; height: 80px; border-radius: 50%; border: 4px solid ${borderColor}; overflow: hidden; background: ${markerColor}; display: flex; align-items: center; justify-content: center;">
+                        <img src="${feature.properties.marker_image}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none';">
+                      </div>`;
+            }
             var customIcon = L.divIcon({
                 className: 'custom-circle-marker',
-                html: `<div style="width: 80px; height: 80px; border-radius: 50%; border: 4px solid ${borderColor}; overflow: hidden; background: ${markerColor}; display: flex; align-items: center; justify-content: center;">
-                        <img src="${feature.properties.marker_image}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none';">
-                      </div>`,
+                html: markerHtml,
                 iconSize: [80, 80],
                 iconAnchor: [40, 40],
                 popupAnchor: [0, -40]
@@ -454,27 +487,66 @@
         }
         // Priority 2: Use thumbnail image (including YouTube thumbnails)
         else if (feature.properties.img) {
+            var markerHtml;
+            if (isStriped) {
+                // Use SVG with image and striped border overlay
+                markerHtml = `<svg width="108" height="108" viewBox="0 0 108 108" xmlns="http://www.w3.org/2000/svg">
+                                <defs>
+                                    <clipPath id="circleClip-${feature.properties.id}">
+                                        <circle cx="54" cy="54" r="50"/>
+                                    </clipPath>
+                                </defs>
+                                <!-- Image clipped to circle -->
+                                <image href="${feature.properties.img}" x="4" y="4" width="100" height="100" clip-path="url(#circleClip-${feature.properties.id})" preserveAspectRatio="xMidYMid slice"/>
+                                <!-- White stroke -->
+                                <circle cx="54" cy="54" r="52" fill="none" stroke="${borderPrimary}" stroke-width="4"/>
+                                <!-- Black dashed stroke -->
+                                <circle cx="54" cy="54" r="52" fill="none" stroke="${borderSecondary}" stroke-width="4" stroke-dasharray="6,6"/>
+                              </svg>`;
+            } else {
+                markerHtml = `<div style="width: 100px; height: 100px; border-radius: 50%; border: 4px solid ${borderColor}; overflow: hidden; background: ${markerColor}; display: flex; align-items: center; justify-content: center;">
+                        <img src="${feature.properties.img}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none';">
+                      </div>`;
+            }
             var customIcon = L.divIcon({
                 className: 'custom-circle-marker',
-                html: `<div style="width: 100px; height: 100px; border-radius: 50%; border: 4px solid ${borderColor}; overflow: hidden; background: ${markerColor}; display: flex; align-items: center; justify-content: center;">
-                        <img src="${feature.properties.img}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none';">
-                      </div>`,
-                iconSize: [100, 100],
-                iconAnchor: [50, 50],
-                popupAnchor: [0, -50]
+                html: markerHtml,
+                iconSize: isStriped ? [108, 108] : [100, 100],
+                iconAnchor: isStriped ? [54, 54] : [50, 50],
+                popupAnchor: isStriped ? [0, -54] : [0, -50]
             });
             marker = L.marker(latlng, {icon: customIcon, alt: feature.properties.title});
         } else {
-            // Use colored circle marker
-            marker = L.circleMarker(latlng, {
-                radius: 10,
-                fillColor: markerColor,
-                color: borderColor,
-                weight: 3,
-                opacity: 1,
-                fillOpacity: 0.8,
-                alt: feature.properties.title
-            });
+            // Use colored circle marker (SVG-based for better striped borders)
+            if (isStriped) {
+                // Create custom SVG icon with alternating black and white striped border
+                var svgIcon = L.divIcon({
+                    className: 'striped-circle-marker',
+                    html: `<svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg">
+                             <!-- Main circle fill -->
+                             <circle cx="13" cy="13" r="10" fill="${markerColor}" fill-opacity="0.8"/>
+                             <!-- White outer stroke -->
+                             <circle cx="13" cy="13" r="11.5" fill="none" stroke="${borderPrimary}" stroke-width="3"/>
+                             <!-- Black dashed stroke on top -->
+                             <circle cx="13" cy="13" r="11.5" fill="none" stroke="${borderSecondary}" stroke-width="3" stroke-dasharray="4,4"/>
+                           </svg>`,
+                    iconSize: [26, 26],
+                    iconAnchor: [13, 13],
+                    popupAnchor: [0, -13]
+                });
+                marker = L.marker(latlng, {icon: svgIcon, alt: feature.properties.title});
+            } else {
+                // Standard circle marker
+                marker = L.circleMarker(latlng, {
+                    radius: 10,
+                    fillColor: markerColor,
+                    color: borderColor,
+                    weight: 3,
+                    opacity: 1,
+                    fillOpacity: 0.8,
+                    alt: feature.properties.title
+                });
+            }
         }
 
         // Store marker for route selection
