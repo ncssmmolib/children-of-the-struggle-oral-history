@@ -1,0 +1,54 @@
+# Map Marker Color Configuration
+#
+# This file controls the colors of location markers on the map.
+# Each category can have a custom color and border color.
+#
+# HOW TO USE:
+# 1. Add a "map_category" column to your CSV file
+# 2. In that column, enter one of the category names below (e.g., "school", "church", "home")
+# 3. To add a new color category, just add it to the list below following the same format
+# 4. To change colors, modify the color and border values (use hex codes like #3388ff)
+#
+# FINDING COLOR CODES:
+# - Use a color picker tool like https://htmlcolorcodes.com/color-picker/
+# - Or use common color names and convert them to hex codes
+#
+# EXAMPLES:
+# - Red: #ff6b6b
+# - Blue: #3388ff
+# - Green: #51cf66
+# - Yellow: #ffd43b
+# - Purple: #9775fa
+# - Orange: #ff922b
+# - Pink: #ff6ac2
+
+categories:
+  school:
+    label: School
+    color: "#3388ff"
+    border: "#0056b3"
+
+  church:
+    label: Church/Chapel
+    color: "#ff6b6b"
+    border: "#c92a2a"
+
+  home:
+    label: Home/Residence
+    color: "#51cf66"
+    border: "#2f9e44"
+
+  business:
+    label: Business/Store
+    color: "#ffd43b"
+    border: "#f08c00"
+
+  community:
+    label: Community Center
+    color: "#9775fa"
+    border: "#7048e8"
+
+# Default color for items without a category or with an unknown category
+default:
+  color: "#51cf66"
+  border: "#2f9e44"
