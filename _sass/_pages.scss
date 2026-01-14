@@ -43,13 +43,32 @@
 /* browse */
 
 /* map */
-#map { height: 750px; z-index: 98; }
+#map {
+    height: 750px;
+    height: calc(100vh - 200px); /* responsive height: viewport height minus navbar/footer */
+    min-height: 500px; /* minimum height for smaller screens */
+    z-index: 98;
+}
 .map-thumb {
     height: 100px;
     max-width: 100%;
 }
 .leaflet-fusesearch-panel .header {
     padding-bottom: 1.5em;
+}
+/* custom map marker styles - circular images with border */
+.custom-map-marker {
+    border: 3px solid white;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    object-fit: cover;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+.custom-map-marker:hover {
+    transform: scale(1.1);
+    border-color: #0d6efd;
+    z-index: 1000 !important;
 }
 
 /* timeline */

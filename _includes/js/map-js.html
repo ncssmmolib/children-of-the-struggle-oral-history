@@ -3,7 +3,7 @@
 {% else %}
 {%- assign items = site.data[site.metadata] | where_exp: 'item','item.objectid and item.parentid == nil' -%}
 {% endif %}
-{%- assign items = items | where_exp: 'item','item.latitude != nil and item.longitude != nil' -%}
+{%- assign items = items | where_exp: 'item','item.latitude != nil and item.longitude != nil and item.include_map == "True"' -%}
 {%- assign fields = site.data.config-map -%}
 <!-- load leaflet dependencies -->
 <script src="{{ '/assets/lib/leaflet/leaflet.js' | relative_url }}"></script>
@@ -12,22 +12,52 @@
 <script src="{{ '/assets/lib/leaflet/leaflet.fusesearch.js' | relative_url }}"></script>{% endif %}
 {% if site.data.theme.map-cluster == true %}<script src="{{ '/assets/lib/leaflet/leaflet.markercluster.js' | relative_url }}"></script>{% endif %}
 {% if site.data.theme.map-search == true and site.data.theme.map-cluster == true %}<script src="{{ '/assets/lib/leaflet/leaflet.markercluster.freezable.js' | relative_url }}"></script>{% endif %}
+<!-- load routing dependencies -->
+<link rel="stylesheet" href="{{ '/assets/lib/leaflet/leaflet-routing-machine.css' | relative_url }}" />
+<script src="{{ '/assets/lib/leaflet/leaflet-routing-machine.js' | relative_url }}"></script>
+<script src="{{ '/assets/lib/leaflet/lrm-openrouteservice.js' | relative_url }}"></script>
+<script src="{{ '/assets/lib/leaflet/leaflet-ant-path.js' | relative_url }}"></script>
+<!-- load timeline dependencies -->
+<script src="{{ '/assets/lib/leaflet/iso8601.min.js' | relative_url }}"></script>
+<link rel="stylesheet" href="{{ '/assets/lib/leaflet/leaflet.timedimension.control.min.css' | relative_url }}" />
+<script src="{{ '/assets/lib/leaflet/leaflet.timedimension.min.js' | relative_url }}"></script>
 
 <script>
 (function(){
+    /* load map color configuration */
+    var mapColors = {
+        {% for category in site.data.map-colors.categories %}
+        "{{ category[0] }}": {
+            color: "{{ category[1].color }}",
+            border: "{{ category[1].border }}"{% if category[1].striped %},
+            striped: {{ category[1].striped }}{% endif %}{% if category[1].border-primary %},
+            "border-primary": "{{ category[1].border-primary }}"{% endif %}{% if category[1].border-secondary %},
+            "border-secondary": "{{ category[1].border-secondary }}"{% endif %}
+        },
+        {% endfor %}
+        "default": {
+            color: "{{ site.data.map-colors.default.color }}",
+            border: "{{ site.data.map-colors.default.border }}"
+        }
+    };
+
     /* add collection map data */
     var geodata = { "type": "FeatureCollection", "features": [ 
     {% for item in items %}
     { "type":"Feature", "geometry":{ "type":"Point", "coordinates":[{{ item.longitude | strip }},{{ item.latitude | strip }}] }, "properties":
-    { 
+    {
         {% for f in fields %}{% if item[f.field] %}{{ f.field | escape | jsonify }}:{{ item[f.field] | strip | escape | jsonify }}, {%- endif -%}{%- endfor -%}
         {% if item.image_thumb %}"img": {{ item.image_thumb | relative_url | jsonify }},{% endif %}
         {% if item.display_template %}"template": {{ item.display_template | escape | jsonify }}, {%- endif -%}
         {% if item.format %}"format": {{ item.format | escape | jsonify }}, {%- endif -%}
         {% if item.image_alt_text %}"alt": {{ item.image_alt_text | escape | jsonify }}, {%- endif -%}
         {% if item.parentid %}"parent": {{ item.parentid | jsonify }}, {%- endif -%}
+        {% if item.marker_image %}"marker_image": {{ item.marker_image | relative_url | jsonify }}, {%- endif -%}
+        {% if item.map_category %}"map_category": {{ item.map_category | strip | escape | jsonify }}, {%- endif -%}
+        {% if item.start_year %}"start": "{{ item.start_year }}-01-01", {%- endif -%}
+        {% if item.end_year %}"end": "{{ item.end_year }}-12-31", {%- endif -%}
         "title": {{ item.title | escape | jsonify }},
-        "id": {{ item.objectid | jsonify }} 
+        "id": {{ item.objectid | jsonify }}
     } }{% unless forloop.last %}, {% endunless %}{% endfor %}
     ]};
 
@@ -67,6 +97,78 @@
     /* load base map */
     {{ site.data.theme.map-base | default: 'Esri_WorldStreetMap' }}.addTo(map);
 
+    /* initialize timeline dimension */
+    console.log('=== TIMELINE INITIALIZATION ===');
+    console.log('Creating TimeDimension with period P1Y and timeInterval 2012/2025');
+
+    var timeDimension = new L.TimeDimension({
+        period: "P1Y",  // 1 year intervals
+        timeInterval: "2012/2025"  // Range covering interview dates
+    });
+    map.timeDimension = timeDimension;
+
+    console.log('TimeDimension created:', timeDimension);
+    console.log('Available times:', timeDimension.getAvailableTimes());
+    console.log('Current time:', timeDimension.getCurrentTime());
+
+    /* add timeline control at bottom */
+    console.log('Adding TimeDimension control to map');
+
+    // Custom date formatter to show only the year
+    L.Control.TimeDimension.include({
+        _getDisplayDateFormat: function(date){
+            console.log('_getDisplayDateFormat called with:', date, 'type:', typeof date);
+            if (!date) {
+                console.log('Date is null/undefined');
+                return '----';
+            }
+            if (typeof date === 'number') {
+                console.log('Date is a timestamp, converting...');
+                date = new Date(date);
+            }
+            if (!(date instanceof Date) || isNaN(date.getTime())) {
+                console.log('Invalid date object:', date);
+                return '----';
+            }
+            var year = date.getUTCFullYear();
+            console.log('Extracted year:', year);
+            return year.toString();
+        }
+    });
+
+    var timeDimensionControl = new L.Control.TimeDimension({
+        position: 'bottomleft',
+        autoPlay: false,
+        loopButton: false,
+        timeSliderDragUpdate: true,
+        playerOptions: {
+            transitionTime: 500,
+            loop: false
+        },
+        timeSlider: true,
+        displayDate: true
+    });
+    map.addControl(timeDimensionControl);
+    console.log('TimeDimension control added');
+
+    // Add event listener for time changes
+    map.timeDimension.on('timeload', function(data) {
+        console.log('=== TIME CHANGED ===');
+        console.log('Raw time value:', data.time);
+        console.log('As Date object:', new Date(data.time));
+        console.log('ISO String:', new Date(data.time).toISOString());
+        console.log('Year:', new Date(data.time).getFullYear());
+        console.log('Current time index:', map.timeDimension.getCurrentTimeIndex());
+        console.log('Available times:', map.timeDimension.getAvailableTimes());
+    });
+
+    // Log when slider is moved
+    map.timeDimension.on('availabletimeschanged', function(data) {
+        console.log('=== AVAILABLE TIMES CHANGED ===');
+        console.log('Available times:', data.availableTimes);
+        console.log('Current time:', data.currentTime);
+    });
+
     {% if site.data.theme.map-search == true %}
     /* add search, https://github.com/naomap/leaflet-fusesearch */
     var options = {
@@ -85,14 +187,191 @@
     searchCtrl.addTo(map);
     searchCtrl.indexFeatures(geodata.features, {{ fields | where: 'search','true' | map: 'field' | unshift: 'title' | jsonify }});{% endif %}
 
-    /* add fullscreen control */ 
+    /* add fullscreen control */
     map.addControl(new L.Control.Fullscreen());
+
+    /* add custom legend */
+    var legend = L.control({position: 'topright'});
+    legend.onAdd = function (map) {
+        var div = L.DomUtil.create('div', 'map-legend');
+        div.innerHTML = `
+            <div style="background: white; padding: 10px; border-radius: 5px; box-shadow: 0 1px 5px rgba(0,0,0,0.4);">
+                <h4 style="margin: 0 0 10px 0; font-size: 14px; font-weight: bold;">Map Legend</h4>
+                <div style="margin-bottom: 5px;">
+                    <span style="display: inline-block; width: 20px; height: 20px; background: #3388ff; border: 3px solid #FFFFFF; box-shadow: 0 0 0 1px #ccc; border-radius: 50%; vertical-align: middle; margin-right: 8px;"></span>
+                    <span style="font-size: 12px;">White-Only Schools</span>
+                </div>
+                <div style="margin-bottom: 5px;">
+                    <span style="display: inline-block; width: 20px; height: 20px; background: #3388ff; border: 3px solid #000000; border-radius: 50%; vertical-align: middle; margin-right: 8px;"></span>
+                    <span style="font-size: 12px;">Black-Only Schools</span>
+                </div>
+                <div style="margin-bottom: 5px;">
+                    <svg width="26" height="20" style="vertical-align: middle; margin-right: 8px;">
+                        <circle cx="10" cy="10" r="8" fill="#3388ff" fill-opacity="0.8"/>
+                        <circle cx="10" cy="10" r="9.5" fill="none" stroke="#FFFFFF" stroke-width="3"/>
+                        <circle cx="10" cy="10" r="9.5" fill="none" stroke="#000000" stroke-width="3" stroke-dasharray="4,4"/>
+                    </svg>
+                    <span style="font-size: 12px;">Desegregated Schools</span>
+                </div>
+                <div style="margin-bottom: 5px;">
+                    <span style="display: inline-block; width: 20px; height: 20px; background: #ff6b6b; border: 3px solid #c92a2a; border-radius: 50%; vertical-align: middle; margin-right: 8px;"></span>
+                    <span style="font-size: 12px;">Churches</span>
+                </div>
+                <div>
+                    <span style="display: inline-block; width: 20px; height: 20px; background: #51cf66; border: 3px solid #2f9e44; border-radius: 50%; vertical-align: middle; margin-right: 8px;"></span>
+                    <span style="font-size: 12px;">Residence</span>
+                </div>
+            </div>
+        `;
+        return div;
+    };
+    legend.addTo(map);
+
+    /* add custom control for clearing routes */
+    L.Control.ClearRoute = L.Control.extend({
+        onAdd: function(map) {
+            var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+            container.innerHTML = '<a href="#" title="Clear Route" style="background-color: white; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-weight: bold; text-decoration: none; color: #333;">✕</a>';
+            container.style.backgroundColor = 'white';
+            container.style.width = '30px';
+            container.style.height = '30px';
+            container.onclick = function(e) {
+                e.preventDefault();
+                clearCurrentRoute();
+            };
+            return container;
+        },
+        onRemove: function(map) {}
+    });
+    L.control.clearRoute = function(opts) {
+        return new L.Control.ClearRoute(opts);
+    };
+    L.control.clearRoute({ position: 'topleft' }).addTo(map);
+
+    /* Interactive routing system between any two points */
+    // please be nice! This is a free key, you can also get your own, openrouteservice.org
+    var ORS_A_P_I_K_E_Y = atob("ZXlKdmNtY2lPaUkxWWpOalpUTTFPVGM0TlRFeE1UQXdNREZqWmpZeU5EZ2lMQ0pwWkNJNklqWXpORFUwWkRGaU4yRXpNRFE1TVRoaVltWmxNREU1WlRGaE1qVmxNbUZqSWl3aWFDSTZJbTExY20xMWNqWTBJbjA9Cg==");
+
+    // State for interactive routing
+    var selectedMarkers = [];
+    var currentAntPath = null;
+    var currentRouteControl = null;
+    var allMarkerLayers = [];
+
+    // Function to clear current route
+    function clearCurrentRoute() {
+        if (currentAntPath) {
+            map.removeLayer(currentAntPath);
+            currentAntPath = null;
+        }
+        if (currentRouteControl) {
+            map.removeControl(currentRouteControl);
+            currentRouteControl = null;
+        }
+        selectedMarkers = [];
+        // Reset marker styling
+        allMarkerLayers.forEach(function(markerLayer) {
+            markerLayer.setOpacity(1.0);
+        });
+    }
+
+    // Function to create route between two markers
+    function createRouteBetweenMarkers(marker1, marker2) {
+        clearCurrentRoute();
+
+        var latlng1 = marker1.getLatLng();
+        var latlng2 = marker2.getLatLng();
+
+        // Get marker titles
+        var title1 = marker1.feature ? marker1.feature.properties.title : 'Location 1';
+        var title2 = marker2.feature ? marker2.feature.properties.title : 'Location 2';
+
+        // Highlight selected markers
+        marker1.setOpacity(0.6);
+        marker2.setOpacity(0.6);
+
+        // Create routing control to get the route and show directions
+        currentRouteControl = L.Routing.control({
+            router: L.Routing.openrouteserviceV2(ORS_A_P_I_K_E_Y, {
+                profile: 'foot-walking'
+            }),
+            waypoints: [latlng1, latlng2],
+            routeWhileDragging: false,
+            addWaypoints: false,
+            show: true,
+            collapsible: true,
+            units: 'imperial',
+            createMarker: function() { return null; }, // Don't create waypoint markers
+            formatter: new L.Routing.Formatter({
+                distanceTemplate: '{value} {unit}',
+                units: 'imperial',
+                unitNames: {
+                    meters: 'mi',
+                    kilometers: 'mi',
+                    yards: 'mi',
+                    miles: 'mi',
+                    minutes: 'min',
+                    hours: 'hr'
+                },
+                formatDistance: function(d) {
+                    // d is already in miles from the API
+                    return Math.round(d * 100) / 100;
+                },
+                formatTime: function(t) {
+                    // t is in seconds, convert to minutes
+                    var minutes = Math.round(t / 60);
+                    return minutes + ' min';
+                }
+            }),
+            plan: L.Routing.plan([latlng1, latlng2], {
+                createMarker: function() { return null; },
+                routeWhileDragging: false,
+                addWaypoints: false
+            }),
+            summaryTemplate: '<h3>{name}</h3><p>{distance}, {time}</p>'
+        });
+
+        // When route is found, create ant path and update title
+        currentRouteControl.on('routesfound', function(e) {
+            var routes = e.routes;
+            var route = routes[0];
+            var coordinates = route.coordinates;
+
+            // Update the route name in the control panel
+            route.name = title1 + ' to ' + title2;
+
+            // Update the displayed route title with line breaks
+            setTimeout(function() {
+                var routeTitle = document.querySelector('.leaflet-routing-container h3');
+                if (routeTitle) {
+                    routeTitle.innerHTML = title1 + '<br>to<br>' + title2;
+                }
+            }, 100);
+
+            // Create ant path with the route coordinates
+            // const options = { use: L.polyline, delay: 400, dashArray: [10,20], weight: 5, color: "#0000FF", pulseColor: "#FFFFFF" };
+            const options = { use: L.polyline, delay: 800, dashArray: [20,40], weight: 25, color: "#0000FF", pulseColor: "#FFFFFF", hardwareAccelerated: true };
+            currentAntPath = L.polyline.antPath(coordinates, options).addTo(map);
+
+            // Fit map to show the route
+            map.fitBounds(currentAntPath.getBounds(), { padding: [50, 50] });
+
+            // Show distance and time in console or popup
+            console.log(`Unedited dist: ${route.summary.totalDistance}`);
+
+            var distance = (route.summary.totalDistance).toFixed(2); // already in miles
+            var time = Math.round(route.summary.totalTime / 60); // Convert to minutes
+            console.log(`Route: ${distance} miles, approximately ${time} minutes walking`);
+        });
+
+        currentRouteControl.addTo(map);
+    }
 
     {% if site.data.theme.map-cluster == true %}
     /* create cluster group */
-    var markers = L.markerClusterGroup({ 
-        maxClusterRadius: {{ site.data.theme.map-cluster-radius | default: 15 }}, 
-        singleMarkerMode: true,
+    var markers = L.markerClusterGroup({
+        maxClusterRadius: {{ site.data.theme.map-cluster-radius | default: 15 }},
+        singleMarkerMode: false,
         iconCreateFunction: function(cluster) {
             /* custom icon function, tweak default to add more alt text */
             var childCount = cluster.getChildCount();
@@ -129,28 +408,254 @@
         }
         // set up popup content
         var popupTemplate = '<h2 class="h4"><a class="text-dark" href="' + itemHref + '">' +
-            feature.properties.title + '</a></h2><div class="text-center"><a href="' + itemHref + 
+            feature.properties.title + '</a></h2><div class="text-center"><a href="' + itemHref +
             '" >' + thumbImg + '</a></div><p>';
         {% for f in fields %}{% if f.display_name %}
         if (feature.properties[{{ f.field | escape | jsonify }}]) {
-            popupTemplate += '<strong>{{ f.display_name }}:</strong> ' + feature.properties[{{ f.field | escape | jsonify }}] + '<br>'; 
+            popupTemplate += '<strong>{{ f.display_name }}:</strong> ' + feature.properties[{{ f.field | escape | jsonify }}] + '<br>';
         }
         {% endif %}{% endfor %}
         popupTemplate += '</p><div class="text-center"><a class="btn btn-light" href="' + itemHref + '" >View Item</a></div>';
+        popupTemplate += '<div class="text-center mt-2"><button class="btn btn-sm btn-primary select-for-route">Select for Route</button></div>';
         layer.bindPopup(popupTemplate);
+
+        // Add click handler for route selection
+        layer.on('click', function(e) {
+            // Handle "Select for Route" button clicks
+            setTimeout(function() {
+                var selectButton = document.querySelector('.select-for-route');
+                if (selectButton) {
+                    selectButton.onclick = function() {
+                        if (selectedMarkers.length === 0) {
+                            selectedMarkers.push(layer);
+                            layer.setOpacity(0.6);
+                            alert('First location selected. Click another marker to create a route.');
+                        } else if (selectedMarkers.length === 1) {
+                            if (selectedMarkers[0] === layer) {
+                                alert('Please select a different location for the route.');
+                                return;
+                            }
+                            selectedMarkers.push(layer);
+                            createRouteBetweenMarkers(selectedMarkers[0], selectedMarkers[1]);
+                            layer.closePopup();
+                        }
+                    };
+                }
+            }, 100);
+        });
     }
     function objectMarkers(feature,latlng) {
-        var marker = L.marker(latlng, {alt: feature.properties.title});
+        var marker;
+
+        // Determine marker color based on map_category field from CSV
+        var category = feature.properties.map_category ? feature.properties.map_category.toLowerCase() : null;
+        var colorConfig = (category && mapColors[category]) ? mapColors[category] : mapColors.default;
+
+        var markerColor = colorConfig.color;
+        var borderColor = colorConfig.border;
+        var isStriped = colorConfig.striped || false;
+        var borderPrimary = colorConfig['border-primary'] || borderColor;
+        var borderSecondary = colorConfig['border-secondary'] || borderColor;
+
+        // Create border style for markers
+        var borderStyle = borderColor;
+        if (isStriped) {
+            // Create a striped border effect using box-shadow
+            borderStyle = `${borderPrimary}`;
+        }
+
+        // Priority 1: Use custom marker_image if specified in CSV
+        if (feature.properties.marker_image) {
+            var markerHtml;
+            if (isStriped) {
+                markerHtml = `<div style="width: 80px; height: 80px; border-radius: 50%; overflow: hidden; background: ${markerColor}; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 0 2px ${borderPrimary}, inset 0 0 0 4px ${borderSecondary}, inset 0 0 0 6px ${borderPrimary};">
+                        <img src="${feature.properties.marker_image}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none';">
+                      </div>`;
+            } else {
+                markerHtml = `<div style="width: 80px; height: 80px; border-radius: 50%; border: 4px solid ${borderColor}; overflow: hidden; background: ${markerColor}; display: flex; align-items: center; justify-content: center;">
+                        <img src="${feature.properties.marker_image}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none';">
+                      </div>`;
+            }
+            var customIcon = L.divIcon({
+                className: 'custom-circle-marker',
+                html: markerHtml,
+                iconSize: [80, 80],
+                iconAnchor: [40, 40],
+                popupAnchor: [0, -40]
+            });
+            marker = L.marker(latlng, {icon: customIcon, alt: feature.properties.title});
+        }
+        // Priority 2: Use thumbnail image (including YouTube thumbnails)
+        else if (feature.properties.img) {
+            var markerHtml;
+            if (isStriped) {
+                // Use SVG with image and striped border overlay
+                markerHtml = `<svg width="108" height="108" viewBox="0 0 108 108" xmlns="http://www.w3.org/2000/svg">
+                                <defs>
+                                    <clipPath id="circleClip-${feature.properties.id}">
+                                        <circle cx="54" cy="54" r="50"/>
+                                    </clipPath>
+                                </defs>
+                                <!-- Image clipped to circle -->
+                                <image href="${feature.properties.img}" x="4" y="4" width="100" height="100" clip-path="url(#circleClip-${feature.properties.id})" preserveAspectRatio="xMidYMid slice"/>
+                                <!-- White stroke -->
+                                <circle cx="54" cy="54" r="52" fill="none" stroke="${borderPrimary}" stroke-width="4"/>
+                                <!-- Black dashed stroke -->
+                                <circle cx="54" cy="54" r="52" fill="none" stroke="${borderSecondary}" stroke-width="4" stroke-dasharray="6,6"/>
+                              </svg>`;
+            } else {
+                markerHtml = `<div style="width: 100px; height: 100px; border-radius: 50%; border: 4px solid ${borderColor}; overflow: hidden; background: ${markerColor}; display: flex; align-items: center; justify-content: center;">
+                        <img src="${feature.properties.img}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.style.display='none';">
+                      </div>`;
+            }
+            var customIcon = L.divIcon({
+                className: 'custom-circle-marker',
+                html: markerHtml,
+                iconSize: isStriped ? [108, 108] : [100, 100],
+                iconAnchor: isStriped ? [54, 54] : [50, 50],
+                popupAnchor: isStriped ? [0, -54] : [0, -50]
+            });
+            marker = L.marker(latlng, {icon: customIcon, alt: feature.properties.title});
+        } else {
+            // Use colored circle marker (SVG-based for better striped borders)
+            if (isStriped) {
+                // Create custom SVG icon with alternating black and white striped border
+                var svgIcon = L.divIcon({
+                    className: 'striped-circle-marker',
+                    html: `<svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg">
+                             <!-- Main circle fill -->
+                             <circle cx="13" cy="13" r="10" fill="${markerColor}" fill-opacity="0.8"/>
+                             <!-- White outer stroke -->
+                             <circle cx="13" cy="13" r="11.5" fill="none" stroke="${borderPrimary}" stroke-width="3"/>
+                             <!-- Black dashed stroke on top -->
+                             <circle cx="13" cy="13" r="11.5" fill="none" stroke="${borderSecondary}" stroke-width="3" stroke-dasharray="4,4"/>
+                           </svg>`,
+                    iconSize: [26, 26],
+                    iconAnchor: [13, 13],
+                    popupAnchor: [0, -13]
+                });
+                marker = L.marker(latlng, {icon: svgIcon, alt: feature.properties.title});
+            } else {
+                // Standard circle marker
+                marker = L.circleMarker(latlng, {
+                    radius: 10,
+                    fillColor: markerColor,
+                    color: borderColor,
+                    weight: 3,
+                    opacity: 1,
+                    fillOpacity: 0.8,
+                    alt: feature.properties.title
+                });
+            }
+        }
+
+        // Store marker for route selection
+        allMarkerLayers.push(marker);
+
         {% if site.data.theme.map-cluster == true %}markers.addLayer(marker);{% endif %}
         return marker;
     }
 
     /* add objects from geoJson features */
+    console.log('=== CREATING MAP FEATURES ===');
+    console.log('GeoData features count:', geodata.features.length);
+    console.log('Sample feature properties:', geodata.features[0]?.properties);
+
     var mapFeatures = L.geoJson(geodata, {
         onEachFeature: objectPopups,
         pointToLayer: objectMarkers
-    }){% if site.data.theme.map-cluster != true %}.addTo(map);{% else %};
-    map.addLayer(markers);{% endif %}
+    });
+    console.log('GeoJSON layer created with', mapFeatures.getLayers().length, 'layers');
+
+    /* wrap with TimeDimension layer */
+    console.log('=== CREATING TIMEDIMENSION LAYER ===');
+    console.log('Creating TimeDimension GeoJSON layer');
+
+    // Check the features for time properties
+    geodata.features.forEach(function(feature, idx) {
+        console.log('Feature', idx, ':', feature.properties.title);
+        console.log('  start:', feature.properties.start, 'end:', feature.properties.end);
+        if (feature.properties.start) {
+            var startDate = new Date(feature.properties.start);
+            console.log('  Parsed start date:', startDate, 'Valid:', !isNaN(startDate.getTime()));
+        }
+    });
+
+    // Manually add times from features to the timeline
+    console.log('Manually registering times with TimeDimension...');
+    var times = [];
+    geodata.features.forEach(function(feature) {
+        // Add start times
+        if (feature.properties.start) {
+            var startTime = new Date(feature.properties.start).getTime();
+            if (!isNaN(startTime) && times.indexOf(startTime) === -1) {
+                times.push(startTime);
+                console.log('  Added start time:', feature.properties.start, 'for', feature.properties.title);
+            }
+        }
+        // Add end times too (important for features that disappear)
+        if (feature.properties.end) {
+            var endTime = new Date(feature.properties.end).getTime();
+            if (!isNaN(endTime) && times.indexOf(endTime) === -1) {
+                times.push(endTime);
+                console.log('  Added end time:', feature.properties.end, 'for', feature.properties.title);
+            }
+        }
+    });
+    times.sort(function(a, b) { return a - b; });
+    console.log('Total unique times to register:', times.length);
+
+    if (times.length > 0) {
+        map.timeDimension.setAvailableTimes(times, 'replace');
+        console.log('Times registered. Available times:', map.timeDimension.getAvailableTimes());
+    }
+
+    var timeDimensionLayer = L.timeDimension.layer.geoJson(mapFeatures, {
+        updateTimeDimension: false,  // We're manually setting times above
+        addlastPoint: false,  // Don't add last point - we want features to disappear
+        duration: null,  // Don't use duration-based display
+        waitForReady: true
+    });
+
+    // Override the default behavior to filter features by time range
+    var originalGetFeatureBetweenDates = timeDimensionLayer._getFeatureBetweenDates;
+    timeDimensionLayer._getFeatureBetweenDates = function(feature, minTime, maxTime) {
+        var start = feature.properties.start ? new Date(feature.properties.start).getTime() : -Infinity;
+        var end = feature.properties.end ? new Date(feature.properties.end).getTime() : Infinity;
+
+        // Check if current time is within the feature's range
+        var isVisible = start <= maxTime && end >= maxTime;
+
+        console.log('Checking feature:', feature.properties.title,
+                    'Time range:', new Date(start).getFullYear(), '-', new Date(end).getFullYear(),
+                    'Current time:', new Date(maxTime).getFullYear(),
+                    'Visible:', isVisible);
+
+        // Return the feature if visible, null otherwise
+        return isVisible ? feature : null;
+    };
+
+    console.log('TimeDimension layer created:', timeDimensionLayer);
+
+    // Log events
+    timeDimensionLayer.on('timeload', function(data) {
+        console.log('Timeline timeload event:', data.time, 'Available times:', timeDimension.getAvailableTimes());
+    });
+
+    map.timeDimension.on('timeloading', function(data) {
+        console.log('Timeline timeloading:', new Date(data.time));
+    });
+
+    map.timeDimension.on('timeload', function(data) {
+        console.log('Timeline timeload:', new Date(data.time));
+    });
+
+    {% if site.data.theme.map-cluster != true %}
+    timeDimensionLayer.addTo(map);
+    {% else %}
+    // For clustered markers, add directly
+    map.addLayer(markers);
+    {% endif %}
 
     {% if site.data.theme.auto-center-map == true %}
     /* if no location was specified in the URL query parameters, auto center the map */
