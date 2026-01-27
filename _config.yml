@@ -8,9 +8,9 @@
 # URL VARIABLES
 #
 # site domain, full URL to the production location of your collection
-url: https://ncssmmolib.github.io/children-of-the-struggle-oral-history/
+url: https://childrenogfthestruggle.org/
 # path to location on the domain if necessary e.g. /digital/hjccc
-baseurl: 
+baseurl: ""
 # location of code, the full url to your github repository
 source-code: https://github.com/oralhistoryasdata/template
 
