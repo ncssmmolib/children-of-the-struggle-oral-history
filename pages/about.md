@@ -28,7 +28,7 @@ The digital side of the Children of the Struggle combines several new and existi
 
 - Interviews from the History Museum of Burke County. In 2015, the [History Museum of Burke County](https://www.thehistorymuseumofburke.org/) began conducting interviews about public school desegregation and developed an exhibit by the name "Children of the Struggle." The exhibit launched in 2017 and is still running as of 2025. It is located in the basement of the History Museum at 201 W Meeting St in Morganton, NC and admission to the Museum is free. *insert photo?*
 
-- Interviews, primary sources, and secondary sources from the NC Civil Rights Trail historical marker committee. In 2022, Dr. Leslie D. McKesson formed a historical marker committee of a group of local activists, archivists, and community members in order to research and install a [historical marker at Slades Chapel AME Church](https://aahc.nc.gov/programs/nc-civil-rights-trail/nc-civil-rights-virtual-trail/slades-chapel-1961). With the support of the [North Carolina Room at the Burke County Public Library](https://bcpls.org/index.php/ncroom/), this committee conducted additional interviews of Black residents who were students during desegregation, specifically the children and friends of the West Concord Mothers. The committee compiled and submitted a packet of primary and secondary sources to make the case for a historical marker installation honoring the West Concord Mothers. Their proposal was successful and the marker was installed on ****, 2023.
+- Interviews, primary sources, and secondary sources from the NC Civil Rights Trail historical marker committee. In 2022, Dr. Leslie D. McKesson advised a historical marker committee of a group of local activists, archivists, and community members in order to research and install a [historical marker at Slades Chapel AME Church](https://aahc.nc.gov/programs/nc-civil-rights-trail/nc-civil-rights-virtual-trail/slades-chapel-1961). With the support of the [North Carolina Room at the Burke County Public Library](https://bcpls.org/index.php/ncroom/), this committee conducted additional interviews of Black residents who were students during desegregation, specifically the children and friends of the West Concord Mothers. The committee compiled and submitted a packet of primary and secondary sources to make the case for a historical marker installation honoring the West Concord Mothers. Their proposal was successful and the marker was installed on ****, 2023.
 
 <div style="text-align: center;">
 <img src="{{ '/assets/img/marker.jpg' | relative_url }}" width="500" height="400" alt="Photograph of historical marker honoring Seven Mothers. Marker has a white background with black lettering and red outline on the edges. Marker reads, 'Slades Chapel. Black mothers led fight for equality in education. Organized meetings and demonstrations here. 1961. Inspired nonviolent change. N.C. African American Heritage Commission. William C. Pomeroy Foundation 2023.">
@@ -37,7 +37,7 @@ The digital side of the Children of the Struggle combines several new and existi
 </figure>
 </div>
 
-- Interviews from Dr. Leslie D. McKesson's students at Appalachian State University. In Fall 2024, Dr. Leslie D. McKesson taught a public history course to undergraduate students at Appalachian State University. The course focused on desegregation of public schools in North Carolina and, specifically, Burke County. As part of the course, her students conducted fourteen interviews on November 9, 2024 at New Day Christian Church in Morganton.
+- Interviews from Dr. Leslie D. McKesson's students at Appalachian State University. In Fall 2024, Dr. Leslie D. McKesson taught a public history course to undergraduate students at Appalachian State University. The course focused on desegregation of public schools in North Carolina and specifically Burke County. As part of the course, her students conducted fourteen interviews on November 9, 2024 at New Day Christian Church in Morganton.
 
 <div style="text-align: center;">
 <img src="{{ '/assets/img/nov-9.jpg' | relative_url }}" width="500" height="400" alt="Photograph of interview participants and checking in and walking through lobby of New Day Christian Church.">
@@ -55,8 +55,8 @@ The digital side of the Children of the Struggle combines several new and existi
 
 ## Gratitude and Acknowledgements
 
-- Dr. Leslie D. McKesson, without whom this project would not exist
 - Project interviewees
+- Dr. Leslie D. McKesson, without whom this project would not exist
 - History Museum of Burke County
 - North Carolina Room at the Burke County Public Library
 - North Carolina School of Science and Mathematics-Morganton faculty, staff, and students
