@@ -24,11 +24,25 @@ This project honors the lives and work of the West Concord Mothers and their des
 From 1958 to 1963 (and beyond), Annie J. Hicks, Ruth Forney, Willette Chambers, Laura Thomas, Lucille Rutherford, Mildred Largent, and Rose Johnson petitioned Morganton City School Board and the Morganton City Council for transportation assistance or for their children to attend the schools closest to their homes, which were the segregated white schools. If the City did not meet their request, the Seven Mothers were prepared to escort their children to the all-white Forest Hill Elementary School, the school closest to their homes. In response to the Mothers' extensive organizing along with pressure from the local branch of the NAACP, Slades Chapel AME Zion Church, Gaston Chapel AME Church, and New Bethel Baptist Church, the Morganton School Board launched a pilot desegregation in 1963. Thirty Black students, mostly from West Concord Street, were reassigned to the formerly all-white schools closer to their homes for the 1963-1964 school year. These students are sometimes referred to as "the first wave" of desegregation in Burke County schools. This was two years before full desegregation took
 place in Burke County in the 1965-1966 school year.
 
+<div style="text-align: center;">
+<img src="{{ '/assets/img/marker-dedication.jpg' | relative_url }}" width="500" height="400" alt="Photograph of the children of the West Concord Mothers at the historical marker dedication at Slades Chapel AME Zion Church.">
+<figure>
+<figcaption>Photo of children of the West Concord Mothers, the first and second waves of Black children to desegregate Burke County schools, at the historical marker unveiling on October 23, 2024 at Slades Chapel AME Zion Church. Courtesy of NC Room of Burke County Public Library.</figcaption>
+</figure>
+</div>
+
 In the fall of 2015, preparation for the upcoming 50th reunion of the first desegregated class of Morganton High School sparked renewed local interest in the desegregation period. The work of the West Concord Mothers and their children became the topic of a local church education program, highlighting Black history. Spearheaded by local researcher and student during the time period, Gary Harbison, New Day Christian Church presented an educational program on the West Concord Mothers in the fall of 2015.
 
 In February of 2016, the Burke County Public Library presented a program on Integration and the Seven Mothers for its annual Black History Month program, the Gathering of the People. The program included a slideshow presentation reviewing the history of Black education in Burke County, along with historic images and eye-witness testimonials. Lucille Rutherford, one of the West Concord Mothers, attended that program. During the program, the History Museum of Burke County announced plans for the “Children of the Struggle” exhibit.
 
 From 2015 to 2017, the History Museum of Burke County developed an exhibit titled “Children of the Struggle” on the history of Black education and the period of desegregation in Burke County schools. This exhibit was inspired through the work and guidance of local historian, Dr. John E. Fleming, who advocated for the preservation of African American history and culture on a local and national scale. Museum staff and Allen Fullwood, local researcher and the first Black member of the Board of Education, conducted oral history interviews of local citizens who were witnesses to the desegregation period. The exhibit launched in 2017 and is still running as of 2026. It is located in the lower level of the History Museum at 201 W Meeting St in Morganton, NC and admission to the Museum is free.
+
+<div style="text-align: center;">
+<img src="{{ '/assets/img/exhibit.jpg' | relative_url }}" width="500" height="400" alt="Photo of History Museum docent providing tour of the Children of the Struggle exhibit to group of elementary school students.">
+<figure>
+<figcaption>History Museum docent providing tour of the Children of the Struggle exhibit to Burke County Public School students.</figcaption>
+</figure>
+</div>
 
 ## About the Project 
 
@@ -44,9 +58,9 @@ Over a period of years, library staff accumulated and organized various resource
 In 2022, a group of local activists, archivists, and community members formed a historical marker committee in order to research and apply for a historical marker sponsored by the North Carolina African American Heritage Commission. The committee conducted additional interviews of Black residents who were students during desegregation, specifically including the children and friends of the West Concord Mothers. The committee compiled and submitted a packet of primary and secondary sources to make the case for a historical marker installation honoring the West Concord Mothers and recognizing the location of Slades Chapel AME Zion Church as a hub of civil rights activities. Their proposal was successful and the historical marker was unveiled and dedicated on October 24, 2023.
 
 <div style="text-align: center;">
-<img src="{{ '/assets/img/marker.jpg' | relative_url }}" width="500" height="400" alt="Photograph of historical marker honoring Seven Mothers. Marker has a white background with black lettering and red outline on the edges. Marker reads, 'Slades Chapel. Black mothers led fight for equality in education. Organized meetings and demonstrations here. 1961. Inspired nonviolent change. N.C. African American Heritage Commission. William C. Pomeroy Foundation 2023.">
+<img src="{{ '/assets/img/marker-church.jpg' | relative_url }}" width="500" height="400" alt="Photograph of historical marker honoring Seven Mothers. Marker has a white background with black lettering and red outline on the edges. Marker reads, 'Slades Chapel. Black mothers led fight for equality in education. Organized meetings and demonstrations here. 1961. Inspired nonviolent change. N.C. African American Heritage Commission. William C. Pomeroy Foundation 2023. Slades Chapel AME Zion Church is visible in the background.">
 <figure>
-<figcaption>Photo of NC Civil Rights Trail historical marker honoring the West Concord Mothers.</figcaption>
+<figcaption>Photo of NC Civil Rights Trail historical marker honoring the West Concord Mothers. Located at Slades Chapel AME Zion Church. Courtesy of NC Room of Burke County Public Library.</figcaption>
 </figure>
 </div>
 
