@@ -16,5 +16,57 @@ The framework served as the foundation for several digital humanities projects, 
 The project is closely related to the [CollectionBuilder](https://collectionbuilder.github.io/) project, and the current iteration was built on top of a CollectionBuilder-GH template. 
 
 
+### Development Guide
 
 
+```bash
+sudo apt update
+sudo apt install -y \
+  build-essential \
+  git \
+  curl \
+  zlib1g-dev \
+  libssl-dev \
+  libreadline-dev \
+  libyaml-dev \
+  libffi-dev \
+  libgdbm-dev \
+  libncurses5-dev \
+  libsqlite3-dev \
+  libxml2-dev \
+  libxslt1-dev
+```
+
+
+```
+curl -fsSL https://github.com/rbenv/rbenv-installer/raw/main/bin/rbenv-installer | bash
+```
+
+Add rbenv to your shell and reload it:
+
+```
+echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.bashrc
+echo 'eval "$(rbenv init -)"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+rbenv install 3.2.2
+rbenv global 3.2.2
+
+```
+gem install bundler
+rbenv rehash
+```
+
+```
+bundle install
+```
+
+```
+bundle exec jekyll serve
+```
+
+The site will be available at:
+```
+http://localhost:4000
+```
