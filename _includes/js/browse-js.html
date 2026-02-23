@@ -3,7 +3,16 @@
 {% else %}
 {%- assign items = site.data[site.metadata] | where_exp: 'item','item.objectid and item.parentid == nil' -%}
 {% endif %}
-{%- assign items = items | where_exp: 'item','item.hide_browse != "true"' -%}
+{%- assign visible_items = "" | split: "" -%}
+
+{%- for item in items -%}
+  {%- assign hb = item.hide_browse | default: "" | downcase -%}
+  {%- unless hb == "true" -%}
+    {%- assign visible_items = visible_items | push: item -%}
+  {%- endunless -%}
+{%- endfor -%}
+
+{%- assign items = visible_items -%}
 {%- assign fields = site.data.config-browse -%}
 <script>
 
