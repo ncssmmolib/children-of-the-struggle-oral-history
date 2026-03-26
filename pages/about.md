@@ -10,6 +10,10 @@ permalink: /about.html
 
 Children of the Struggle is a digital collaboration building upon decades of community work to document and preserve the stories of Black residents who lived through desegregation and fought for civil rights in Burke County, North Carolina.
 
+<video>
+  <source src="{{'assets/img/trailer.mp4' | relavite_url }}" width="500" height="400" alt="Project trailer created by digital humanities students at NCSSM-Morganton.">
+</video>
+
 ## Background
 
 This project honors the lives and work of the West Concord Mothers and their descendants, who are also referred to as the "Seven Mothers" or the "Big Seven." Their children were the first to desegregate local schools in the early 1960's. 
