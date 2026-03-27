@@ -10,9 +10,11 @@ permalink: /about.html
 
 Children of the Struggle is a digital collaboration building upon decades of community work to document and preserve the stories of Black residents who lived through desegregation and fought for civil rights in Burke County, North Carolina.
 
-<video>
-  <source src="{{'assets/img/trailer.mp4' | relavite_url }}" width="500" height="400" alt="Project trailer created by digital humanities students at NCSSM-Morganton.">
-</video>
+{% include feature/video.html
+   objectid="https://youtu.be/B9WImUhy6eo"
+   caption=false
+   width="75"
+   ratio="16x9" %}
 
 ## Background
 
